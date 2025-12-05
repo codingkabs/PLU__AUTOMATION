@@ -1,152 +1,139 @@
-# PLU Auto-Entry Automation
+==================================================
+PLU AUTO ENTRY AUTOMATION
+==================================================
 
-This project automates PLU training and testing by recognising the on-screen product image, matching it against a set of template screenshots, and typing the correct PLU automatically. It also saves unknown items for later labelling and detects an ending screen so it can stop cleanly. The motive was simple: entering 60+ PLU codes manually is a special form of punishment, and automation exists for a reason.
+This project automates PLU training and testing by recognising the on screen product image, comparing it against template screenshots, and typing the correct PLU automatically. It also saves unknown items for later labelling and detects an ending screen to stop the run. It exists because manually entering long lists of PLU codes is not the best use of anyone’s day.
 
----
+==================================================
+TABLE OF CONTENTS
+==================================================
 
-## Table of Contents
+Overview
+Features
+Prerequisites
+How It Works
+Project Structure
+Setup and Usage
+Accuracy Tips
+Other Use Cases
+Final Notes
 
-- Overview
-- Features
-- Prerequisites
-- How It Works
-- Project Structure
-- Setup and Usage
-- Accuracy Tips
-- Other Use Cases
-- Final Notes
+==================================================
+OVERVIEW
+==================================================
 
----
+The script captures a specified region of the screen, compares that region against existing template images, selects the closest match, and types the corresponding PLU. If no confident match is found, the script saves the screenshot to the templates folder and enters zero. A designated STOP template ends the script immediately. Moving the mouse to the top left corner stops execution through a built in fail safe.
 
-## Overview
+The system is fast, consistent, and highly accurate when configured correctly.
 
-The script captures a fixed region of the screen, compares it with your existing templates, identifies the closest match, and enters the corresponding PLU. If the item is unknown, the system automatically saves the screenshot so you can label it later. A special STOP template ends the run, and a fail-safe mechanism stops everything if the mouse is moved to the top-left corner.
+==================================================
+FEATURES
+==================================================
 
-The system is fast, simple, and surprisingly accurate when configured correctly.
+Automatic extraction of the product image region
+Template based comparison and matching
+Automatic typing and submission of correct PLUs
+Saving of unknown images for later manual tagging
+STOP template detection for clean and instant termination
+Fail safe exit by moving cursor to the top left
+Configurable speed and matching threshold
 
----
+==================================================
+PREREQUISITES
+==================================================
 
-## Features
+Python 3.9 or later
+Windows 10 or 11
+pip installed
 
-- Automated product-region screenshot capture.
-- Template-matching with configurable tolerance.
-- Automatic PLU input through keyboard simulation.
-- Automatic saving of unknown items for later tagging.
-- STOP-template detection for clean shutdown.
-- Fail-safe exit by moving the cursor to the top-left.
-- Adjustable delays for speed control.
-
----
-
-## Prerequisites
-
-### Software Required
-
-- Python 3.9 or later  
-- Windows 10 or 11  
-- pip installed  
-
-Install the required dependencies:
-
+Install dependencies using:
 pip install opencv-python pyautogui numpy
 
-(Left plain so it does not break formatting.)
+==================================================
+HOW IT WORKS
+==================================================
 
----
+Screen Region Capture
+The script takes a screenshot and crops it using the configured coordinates. Only the area containing the product is processed.
 
-## How It Works
+Template Comparison
+All templates in the templates folder are loaded and compared to the captured image. A simple pixel difference score is used to determine similarity. The template with the lowest score is treated as the predicted match.
 
-### 1. Screen Region Capture
+PLU Entry
+If the match score is below a defined threshold, the associated PLU value is typed followed by Enter.
 
-The script uses fixed coordinates to extract the portion of the display showing the current product image.
+Unknown Item Handling
+If confidence is low, the screenshot is saved with an incremental filename such as unknown_017.png. The script submits zero and moves on.
 
-python
-roi = img[IMAGE_TOP:IMAGE_BOTTOM, IMAGE_LEFT:IMAGE_RIGHT]
+STOP Detection
+If the matched PLU corresponds to STOP, the script prints a message and exits immediately.
 
+Fail Safe Exit
+Moving the mouse to the top left corner causes the script to stop at once.
 
-### 2. Template Comparison
+==================================================
+PROJECT STRUCTURE
+==================================================
 
-Each template image in the `templates` folder is loaded and compared to the current screenshot using a simple image-difference method.  
-The template with the lowest difference score is selected.
+project
+auto_plu.py
+get_position.py
+templates
+known templates
+unknown_001.png
+unknown_002.png
+unknown_083.png
 
-### 3. PLU Entry
+==================================================
+SETUP AND USAGE
+==================================================
 
-If the match score falls below the defined threshold, the script types the PLU using simulated keyboard input and submits it.
+Step 1
+Open your emulator and position the PLU training or testing window. Once coordinates are captured, do not move or resize the window.
 
-### 4. Unknown Handling
+Step 2
+Use a coordinate capture tool to determine:
+IMAGE_LEFT
+IMAGE_TOP
+IMAGE_RIGHT
+IMAGE_BOTTOM
+Enter these values in the main script.
 
-If no template confidently matches:
-
-- The current screenshot is saved as `unknown_###.png`
-- The script enters `0` to move forward  
-- You can later label the unknown files and add them to the ITEMS dictionary
-
-### 5. STOP Detection
-
-If a matched template corresponds to `"STOP"`:
-
-- The script prints a message  
-- Immediately exits  
-
-### 6. Fail-Safe
-
-Dragging your mouse to the top-left corner instantly stops the script, which is very useful when something unexpected happens.
-
----
-
-## Project Structure
-
-project/
-│
-├── auto_plu.py # Main automation script
-├── get_position.py # Helper tool for coordinate capture
-│
-└── templates/
-├── known templates
-├── unknown_001.png
-├── unknown_002.png
-└── unknown_083.png # STOP template
-
-
-
----
-
-## Setup and Usage
-
-### 1. Open Your Emulator
-
-Set up your PLU training/testing environment and position the window exactly where your coordinates expect it.  
-Do not move or resize it during operation.
-
-### 2. Configure Coordinates
-
-Use a helper tool to record:
-
-- IMAGE_LEFT  
-- IMAGE_TOP  
-- IMAGE_RIGHT  
-- IMAGE_BOTTOM  
-
-Update these in your script.
-
-### 3. Run the Program
-
-Run:
-
+Step 3
+Run the program:
 python auto_plu.py
+Focus the emulator window during the countdown.
 
-Then click on the emulator window during the countdown.
+Step 4
+The script will process items sequentially. It will recognise known items, enter PLUs, save unknowns, and stop when the STOP template is detected.
 
-### 4. Script Behaviour
+Step 5
+To improve accuracy, label unknown images by assigning PLU values in the mapping within the script. Over time the template library becomes complete and extremely reliable.
 
-The script will:
+==================================================
+ACCURACY TIPS
+==================================================
 
-- Recognise known items  
-- Enter PLUs  
-- Save unknown images  
-- Stop automatically when the STOP screen is detected  
+Ensure templates are tightly cropped and consistent in size
+Keep the emulator in the same position and size every time
+Lower MATCH_THRESHOLD for stricter comparison
+If results deteriorate, recheck your coordinates and ensure window alignment is unchanged
 
-### 5. Labelling Unknowns
+==================================================
+OTHER USE CASES
+==================================================
 
-Inside the `templates` folder you will find new unknown images:
+The same approach can automate any screen based workflow where actions depend on recognising visuals. Suitable areas include:
+General UI automation
+Lightweight software testing
+Dataset generation through repeated screenshot capture
+Simulation or training interface automation
+Basic game automation driven by static screens
 
+Any rule of the form when this picture appears perform this action can be implemented using this method.
+
+==================================================
+FINAL NOTES
+==================================================
+
+This project avoids heavy machine learning intentionally. The deterministic pixel based method is fast, predictable, and simple to debug. It provides a strong base for future enhancements such as OCR, structural similarity metrics, or more sophisticated recognition methods if desired.
